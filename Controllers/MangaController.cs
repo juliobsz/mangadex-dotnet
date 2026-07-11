@@ -25,11 +25,25 @@ public class MangaController : ControllerBase
         if (accessToken == null) return StatusCode(401);
         client.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken);
 
-        var res = await client.GetAsync("https://api.mangadex.org/user/follows/manga");
-        if (!res.IsSuccessStatusCode) return StatusCode(401);
+        var offset = 0;
+        var loop = true;
+        var total = 0;
+        while (loop)
+        {
+            var res = await client.GetAsync("https://api.mangadex.org/user/follows/manga?limit=100&offset=" + offset);
+            if (!res.IsSuccessStatusCode) return StatusCode(401);
+            
+            var body = await res.Content.ReadFromJsonAsync<MangaResponse>();
+            if (body?.Total == 100) {
+                offset += 100;
+                total += 100;
+            } else {
+                loop = false;
+                total += body?.Total ?? 0;
+            }
+        }
         
-        var body = await res.Content.ReadFromJsonAsync<MangaResponse>();
-        return StatusCode(200, body?.Data?.Length);
+        return StatusCode(200, total);
     }
     
     public async Task<string?> Auth(HttpClient client)

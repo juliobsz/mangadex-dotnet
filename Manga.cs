@@ -66,4 +66,5 @@ public class MangaResponse
     public string? Result { get; set; }
     public string? Response { get; set; }
     public Manga[]? Data { get; set; }
+    public int? Total { get; set; }
 }
