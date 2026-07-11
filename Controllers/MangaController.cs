@@ -26,9 +26,8 @@ public class MangaController : ControllerBase
         client.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken);
 
         var offset = 0;
-        var loop = true;
         var total = 0;
-        while (loop)
+        while (true)
         {
             var res = await client.GetAsync("https://api.mangadex.org/user/follows/manga?limit=100&offset=" + offset);
             if (!res.IsSuccessStatusCode) return StatusCode(401);
@@ -38,8 +37,8 @@ public class MangaController : ControllerBase
                 offset += 100;
                 total += 100;
             } else {
-                loop = false;
                 total += body?.Total ?? 0;
+                break;
             }
         }
         
