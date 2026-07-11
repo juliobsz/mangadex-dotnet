@@ -7,12 +7,13 @@ public class Manga
     public string? Id { get; set; }
     public string? Type { get; set; }
     public MangaAttributes? Attributes {  get; set; }
+    public MangaRelantionships[]? Relantionships { get; set; }
 }
 
 public class MangaAttributes
 {
     [JsonPropertyName("title")]
-    public string Title { get; } = "";
+    public Dictionary<string, string>? Title { get; set; }
     [JsonPropertyName("altTitle")]
     public string AltTitle { get; } = "";
     [JsonPropertyName("description")]
@@ -53,6 +54,20 @@ public class MangaAttributes
     public string LatestUploadedChapter { get; } = "";
 }
 
+public class MangaRelantionships
+{
+    public string? Id { get; set; }
+    public string? Type { get; set; }
+    public RelantionshipAttributes? Attributes { get; set; }
+}
+
+public class RelantionshipAttributes
+{
+    [JsonPropertyName("fileName")]
+    public string? FileName { get; set; }
+    public string? Version { get; set; }
+}
+
 public class Auth
 {
     [JsonPropertyName("access_token")] 
@@ -65,6 +80,14 @@ public class MangaResponse
 {
     public string? Result { get; set; }
     public string? Response { get; set; }
-    public Manga[]? Data { get; set; }
+    public Manga? Data { get; set; }
     public int? Total { get; set; }
+}
+
+public class MangaStatusResponse
+{
+    public string? Result { get; set; }
+    public string? Response { get; set; }
+    [JsonPropertyName("statuses")]
+    public Dictionary<string, string>? Stats { get; set; }
 }
