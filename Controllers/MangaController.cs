@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
 
 namespace mangadex_api.Controllers;
 
@@ -16,14 +15,26 @@ public class MangaController : ControllerBase
         _httpClientFactory = httpClientFactory;
     }
 
-    [HttpPost("authenticate")]
-    public async Task<IActionResult> Auth()
+    [HttpGet("sync")]
+    public async Task<IActionResult> SyncFollows()
     {
-        var client = _httpClientFactory.CreateClient();
+        var client = _httpClientFactory.CreateClient("mangadex");
         client.DefaultRequestHeaders.UserAgent.ParseAdd("mangadex-api/1.0");
         
+        var accessToken = await Auth(client);
+        if (accessToken == null) return StatusCode(401);
+        client.DefaultRequestHeaders.Add("Authorization", "Bearer " + accessToken);
+
+        var res = await client.GetAsync("https://api.mangadex.org/user/follows/manga");
+        if (!res.IsSuccessStatusCode) return StatusCode(401);
+        
+        var body = await res.Content.ReadFromJsonAsync<MangaResponse>();
+        return StatusCode(200, body?.Data?.Length);
+    }
+    
+    public async Task<string?> Auth(HttpClient client)
+    {
         var username = _config["MangaDex:Username"] ?? "";
-        Console.WriteLine(username);
         var password = _config["MangaDex:Password"] ?? "";
         var clientId = _config["MangaDex:ClientId"] ?? "";
         var clientSecret = _config["MangaDex:ClientSecret"] ?? "";
@@ -37,21 +48,8 @@ public class MangaController : ControllerBase
         };
         var res = await client.PostAsync("https://auth.mangadex.org/realms/mangadex/protocol/openid-connect/token",
             new FormUrlEncodedContent(data));
-        //res.EnsureSuccessStatusCode();
-
-        var body = await res.Content.ReadAsStringAsync();
-        return StatusCode(200, body);
+        if (!res.IsSuccessStatusCode) return null;
+        var body = await res.Content.ReadFromJsonAsync<Auth>();
+        return body?.AccessToken;
     }
-    
-    /*[HttpGet(Name = "GetWeatherForecast")]
-    public IEnumerable<WeatherForecast> Get()
-    {
-        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        })
-        .ToArray();
-    }*/
 }
