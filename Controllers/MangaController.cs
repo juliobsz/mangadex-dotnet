@@ -43,6 +43,7 @@ public class MangaController : ControllerBase
         for (var i = 0; i < body.Stats.Count; i++)
         {
             var stats = body.Stats.ElementAt(i);
+            client.DefaultRequestHeaders.Remove("Authorization");
             var mangaResponse = await client.GetAsync($"https://api.mangadex.org/manga/{stats.Key}?includes[]=cover_art");
             if (!mangaResponse.IsSuccessStatusCode) return StatusCode(401);
             var manga = await mangaResponse.Content.ReadFromJsonAsync<MangaResponse>();
