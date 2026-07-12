@@ -2,7 +2,7 @@
 {
     public interface IMangaRepository
     {
-        //Task<Models.Manga> GetByIdAsync(int id);
         Task AddAsync(Models.Manga manga);
+        Task<IEnumerable<Models.Manga>> GetAllAsync();
     }
 }

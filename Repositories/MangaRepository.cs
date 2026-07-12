@@ -1,5 +1,5 @@
 ﻿using mangadex_api.Data;
-using mangadex_api.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace mangadex_api.Repositories
 {
@@ -11,11 +11,16 @@ namespace mangadex_api.Repositories
         {
             _context = context;
         }
-
+        
         public async Task AddAsync(Models.Manga manga)
         {
             await _context.Mangas.AddAsync(manga);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<Models.Manga>> GetAllAsync()
+        {
+            return await _context.Mangas.ToListAsync();
         }
     }
 }

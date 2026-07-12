@@ -18,6 +18,12 @@ public class MangaController : ControllerBase
         _httpClientFactory = httpClientFactory;
     }
 
+    [HttpGet("mangas")]
+    public async Task<IActionResult> GetMangas()
+    {
+        return StatusCode(200, await _mangaRepository.GetAllAsync());
+    }
+
     [HttpGet("sync")]
     public async Task<IActionResult> SyncFollows()
     {
@@ -40,10 +46,11 @@ public class MangaController : ControllerBase
             var mangaResponse = await client.GetAsync($"https://api.mangadex.org/manga/{stats.Key}?includes[]=cover_art");
             if (!mangaResponse.IsSuccessStatusCode) return StatusCode(401);
             var manga = await mangaResponse.Content.ReadFromJsonAsync<MangaResponse>();
+            
             if  (manga?.Data == null) continue;
             var mangaData = manga.Data;
-            
-            var coverArt = mangaData.Relantionships?.FirstOrDefault(r => r.Type == "cover_art");
+
+            var coverArt = mangaData.Relationships?.FirstOrDefault(r => r.Type == "cover_art");
             var data = new Models.Manga
             {
                 MangaDexId = mangaData.Id ?? "",
