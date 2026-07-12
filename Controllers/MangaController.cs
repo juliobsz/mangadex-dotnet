@@ -5,41 +5,30 @@ namespace mangadex_api.Controllers;
 
 [ApiController]
 [Route("v1")]
-public class MangaController : ControllerBase
+public class MangaController(IHttpClientFactory httpClientFactory, IConfiguration config, IMangaRepository mangaRepository) : ControllerBase
 {
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IConfiguration _config;
-    private readonly IMangaRepository _mangaRepository;
-
-    public MangaController(IHttpClientFactory httpClientFactory, IConfiguration config, IMangaRepository mangaRepository)
-    {
-        _config = config;
-        _mangaRepository = mangaRepository;
-        _httpClientFactory = httpClientFactory;
-    }
-
     [HttpGet("mangas")]
     public async Task<IActionResult> GetMangas()
     {
-        return StatusCode(200, await _mangaRepository.GetAllAsync());
+        return StatusCode(200, await mangaRepository.GetAllAsync());
     }
     
     [HttpGet("favorites")]
     public async Task<IActionResult> GetFavorites()
     {
-        return StatusCode(200, await _mangaRepository.GetFavoritesAsync());
+        return StatusCode(200, await mangaRepository.GetFavoritesAsync());
     }
     
     [HttpGet("recents")]
     public async Task<IActionResult> GetRecents()
     {
-        return StatusCode(200, await _mangaRepository.GetRecentsAsync());
+        return StatusCode(200, await mangaRepository.GetRecentsAsync());
     }
 
     [HttpGet("sync")]
     public async Task<IActionResult> SyncFollows()
     {
-        var client = _httpClientFactory.CreateClient("mangadex");
+        var client = httpClientFactory.CreateClient("mangadex");
         client.DefaultRequestHeaders.UserAgent.ParseAdd("mangadex-api/1.0");
         
         var accessToken = await Auth(client);
@@ -73,7 +62,7 @@ public class MangaController : ControllerBase
                 Status = stats.Value,
                 Favorite = false
             };
-            await _mangaRepository.AddAsync(data);
+            await mangaRepository.AddAsync(data);
         }
         
         return StatusCode(200, new { message = $"{body.Stats.Count} synced" });
@@ -81,10 +70,10 @@ public class MangaController : ControllerBase
     
     public async Task<string?> Auth(HttpClient client)
     {
-        var username = _config["MangaDex:Username"] ?? "";
-        var password = _config["MangaDex:Password"] ?? "";
-        var clientId = _config["MangaDex:ClientId"] ?? "";
-        var clientSecret = _config["MangaDex:ClientSecret"] ?? "";
+        var username = config["MangaDex:Username"] ?? "";
+        var password = config["MangaDex:Password"] ?? "";
+        var clientId = config["MangaDex:ClientId"] ?? "";
+        var clientSecret = config["MangaDex:ClientSecret"] ?? "";
         var data = new Dictionary<string, string>
         {
             { "grant_type", "password" },
