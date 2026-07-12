@@ -22,5 +22,15 @@ namespace mangadex_api.Repositories
         {
             return await _context.Mangas.ToListAsync();
         }
+
+        public async Task<IEnumerable<Models.Manga>> GetFavoritesAsync()
+        {
+            return await _context.Mangas.Where(m => m.Favorite).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Models.Manga>> GetRecentsAsync()
+        {
+            return await _context.Mangas.OrderBy(m => m.UpdatedAt).Take(4).ToListAsync();
+        }
     }
 }

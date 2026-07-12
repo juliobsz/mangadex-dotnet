@@ -23,6 +23,18 @@ public class MangaController : ControllerBase
     {
         return StatusCode(200, await _mangaRepository.GetAllAsync());
     }
+    
+    [HttpGet("favorites")]
+    public async Task<IActionResult> GetFavorites()
+    {
+        return StatusCode(200, await _mangaRepository.GetFavoritesAsync());
+    }
+    
+    [HttpGet("recents")]
+    public async Task<IActionResult> GetRecents()
+    {
+        return StatusCode(200, await _mangaRepository.GetRecentsAsync());
+    }
 
     [HttpGet("sync")]
     public async Task<IActionResult> SyncFollows()
